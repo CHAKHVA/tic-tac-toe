@@ -1,9 +1,8 @@
 from pydantic import BaseModel
-from app.models import Player
 
 
 class MoveInput(BaseModel):
-    move_type: str
+    type: str
     position: int
 
     class Config:

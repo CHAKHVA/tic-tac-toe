@@ -1,7 +1,6 @@
 from fastapi import Depends, FastAPI, HTTPException, Path
 from fastapi.middleware.cors import CORSMiddleware
 from app.models import *
-
 from app.schemas import GameResult, MoveInput
 from app.database import SessionLocal, engine
 from sqlalchemy.orm import Session
@@ -54,33 +53,28 @@ def make_move(
 
     if move.position < 0 or move.position > 8:
         db.close()
-        raise HTTPException(status_code=400, detail="Invalid position")
+        return {"result": "error", "error_code": "invalid_position"}
 
     board = list(str(game.board))
     if board[move.position] != " ":
         db.close()
-        raise HTTPException(status_code=400, detail="Invalid position")
+        return {"result": "error", "error_code": "invalid_position"}
 
-    board[move.position] = move.move_type
+    board[move.position] = move.type
     game.board = "".join(board)
 
     # Check for a winner
-    if check_winner(board, move.move_type):
+    if check_winner(board, move.type) or " " not in board:
         game.status = GameStatus.finished
-        game_result = {"game": "finished", "winner": move.move_type}
-    elif " " not in board:
-        game.status = GameStatus.finished
-        game_result = {"game": "finished", "winner": None}
     else:
-        game.current_player = Player.X if move.move_type == "O" else Player.O
-        game_result = {"game": "in_progress"}
+        game.current_player = Player.X if move.type == "O" else Player.O
 
-    move_db = Move(game_id=game.id, move_type=move.move_type, position=move.position)
+    move_db = Move(game_id=game.id, move_type=move.type, position=move.position)
     db.add(move_db)
     db.commit()
     db.close()
 
-    return game_result
+    return {"result": "success"}
 
 
 @app.get("/check/{game_id}", response_model=GameResult)
