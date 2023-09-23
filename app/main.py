@@ -35,7 +35,7 @@ def start_game(db: Session = Depends(get_db)):
     return {"game_id": game.id}
 
 
-@app.post("/move/{game_id}", response_model=GameResult)
+@app.post("/move/{game_id}", response_model=dict)
 def make_move(
     *,
     game_id: int = Path(..., description="Game ID"),
@@ -64,8 +64,11 @@ def make_move(
     game.board = "".join(board)
 
     # Check for a winner
-    if check_winner(board, move.type) or " " not in board:
+    if check_winner(board, move.type):
         game.status = GameStatus.finished
+    elif " " not in board:
+        game.status = GameStatus.finished
+        game.current_player = None
     else:
         game.current_player = Player.X if move.type == "O" else Player.O
 
