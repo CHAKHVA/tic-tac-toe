@@ -19,7 +19,7 @@ class Game(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     status = Column(String, default=GameStatus.in_progress)
-    board = Column(String, default="         ")
+    board = Column(String(length=9), default="         ")
     current_player = Column(String, default=Player.X)
 
     moves = relationship("Move", back_populates="game")
@@ -30,7 +30,7 @@ class Move(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     game_id = Column(Integer, ForeignKey("games.id"))
-    type = Column(String)
+    move_type = Column(String)
     position = Column(Integer)
 
     game = relationship("Game", back_populates="moves")

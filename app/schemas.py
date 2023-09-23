@@ -3,7 +3,7 @@ from app.models import Player
 
 
 class MoveInput(BaseModel):
-    type: Player
+    move_type: str
     position: int
 
     class Config:
